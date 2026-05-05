@@ -1,6 +1,10 @@
 public class PricingEngine {
+    // استبدال Magic Numbers بثوابت (Constants) لتحسين القابلية للصيانة
+    private static final double TAX_RATE = 0.19;
+    private static final double VIP_BASE_RATE = 0.15;
+    private static final double SAVE20_BONUS = 0.20;
+    private static final double REGULAR_DISCOUNT = 0.10;
 
-    // الدالة الرئيسية أصبحت نظيفة وتقرأ كقصة
     public double calculate(double[] prices, int[] quantities, String customerType, String discountCode) {
         double subtotal = calculateSubtotal(prices, quantities);
         double discount = getDiscountAmount(subtotal, customerType, discountCode);
@@ -9,29 +13,30 @@ public class PricingEngine {
         return (subtotal - discount) + tax;
     }
 
-    // فصل حساب المجموع الفرعي
     private double calculateSubtotal(double[] prices, int[] quantities) {
-        double sum = 0;
+        double total = 0;
         for (int i = 0; i < prices.length; i++) {
-            sum += prices[i] * quantities[i];
+            total += prices[i] * quantities[i];
         }
-        return sum;
+        return total;
     }
 
-    // فصل منطق الخصومات لتسهيل تعديله مستقبلاً
+    // تطبيق تقنية Guard Clauses لتبسيط الشروط المتداخلة
     private double getDiscountAmount(double subtotal, String customerType, String code) {
-        double rate = 0;
         if ("VIP".equals(customerType)) {
-            rate = 0.15;
-            if ("SAVE20".equals(code)) rate += 0.20;
-        } else if ("REGULAR".equals(customerType) && "SAVE10".equals(code)) {
-            rate = 0.10;
+            double rate = VIP_BASE_RATE;
+            if ("SAVE20".equals(code)) rate += SAVE20_BONUS;
+            return subtotal * rate;
         }
-        return subtotal * rate;
+        
+        if ("REGULAR".equals(customerType) && "SAVE10".equals(code)) {
+            return subtotal * REGULAR_DISCOUNT;
+        }
+        
+        return 0; // التعامل مع الحالة الافتراضية بوضوح
     }
 
-    // فصل حساب الضريبة
     private double calculateTax(double amount) {
-        return amount * 0.19;
+        return amount * TAX_RATE;
     }
 }
